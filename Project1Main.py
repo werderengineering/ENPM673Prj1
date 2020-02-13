@@ -78,6 +78,8 @@ def main(prgRun):
             contours, hierarchy = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             frame = cv2.drawContours(ogframe, contours, 1, (0, 255, 0), 3)
 
+            ###TEST
+
 
 
 
