@@ -26,9 +26,13 @@ im_height = 240
 
 
 def main(prgRun):
+    DWF = np.zeros([180, 320, 3])
+    framecount = 1
+
     print('Initializations complete')
-    framecount=1
-    datachoice = int(input('\nWhich video data would you like to use? \nPlease enter 1, 2, or 3: '))
+
+    datachoice=1
+    # datachoice = int(input('\nWhich video data would you like to use? \nPlease enter 1, 2, or 3: '))
     # section = input('\nIdentify QR code? Impose Image? Impose Cube? \nPlease enter 1, 2, or 3: ')
 
     if datachoice == 1:
@@ -52,19 +56,26 @@ def main(prgRun):
             ###########################
             frame = imutils.resize(frame, width=320)
             ogframe = frame
+            clnframe=frame
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 
             # frame = cv2.bilateralFilter(frame, 9, 75, 75)
-            (thresh, frame) = cv2.threshold(frame, 220, 255, cv2.THRESH_BINARY)
-            # frame = np.float32(frame)
             # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            # frame = cv2.GaussianBlur(frame, (1, 1), 0)
-            # frame = cv2.Canny(frame, 220, 255)
+
+            # (thresh, frame) = cv2.threshold(frame, 180, 255, cv2.THRESH_BINARY)
+
+            mask = cv2.inRange(frame, 180, 255)
+            frame = cv2.bitwise_or(frame, frame, mask=mask)
+
+            # frame = cv2.Canny(frame, 180,255)
             # cv2.imshow('Thresh', frame)
             # print(frame.shape)
 
             cnts, hierarchy = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            # cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[1:]
+            # print(cnts)
+
             if framecount>1:
                 cntsmissing=(cv2.contourArea(oldcnts[1])-cv2.contourArea(cnts[1]))**2
                 if cntsmissing >3200000:
@@ -74,9 +85,9 @@ def main(prgRun):
             epsilon = 0.1 * cv2.arcLength(cnts[1], True)
             corners=cv2.approxPolyDP(cnts[1], epsilon, True)
 
-            for i in range(len(corners)):
-                x, y = corner_points[i][0], corner_points[i][1]
-                cv2.circle(frame, (x, y), 3, (0, 0, 255), -1)
+            # for i in range(len(corners)):
+            #     x, y = corners[i][0], corners[i][1]
+            #     cv2.circle(frame, (x, y), 3, (0, 0, 255), -1)
 
             # print('##########')
             # print(corners)
@@ -99,52 +110,63 @@ def main(prgRun):
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
 
-            try:
-            # if True:
+            # try:
+            if True:
+                # boundingbox= [cv2.boundingRect(c) for c in cnts])
+
+                cnt=cnts[0]
+
+                x, y, w, h = cv2.boundingRect(cnt)
+                # cv2.rectangle(ogframe, (x, y), (x + w, y + h), (0, 255, 255), 2)
+
+                rect = cv2.minAreaRect(cnt)
+                # print(rect)
+                # input()
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
+                #
+                # print(box)
+                # print(box[0])
+                cv2.drawContours(clnframe, [box], 0, (0, 0, 255), 2)
+
+                cv2.imshow('box',clnframe)
 
 
-                cnts = imutils.grab_contours(cnts)
-                cntsx = cnts[:, :, 0]
-                cntsy = cnts[:, :, 1]
-                maxX = np.argmax(cntsx)
-                minX = np.argmin(cntsx)
-                maxY = np.argmax(cntsy)
-                minY = np.argmin(cntsy)
+                TL=np.array([box[0][0],box[0][1]])
+                LL=np.array([box[1][0],box[1][1]])
+                LR=np.array([box[2][0],box[2][1]])
+                TR = np.array([box[3][0], box[3][1]])
 
-
-                TL=np.array([cntsx[minX],cntsy[maxY]])
-                TR=np.array([cntsx[maxX],cntsy[maxY]])
-                LL=np.array([cntsx[minX],cntsy[minY]])
-                LR=np.array([cntsx[maxX],cntsy[minY]])
-
-                # print("#####################")
-                # print(cnts)
-                # print("#####################")
                 # print(TL)
-                # print(TR)
-                # print(LL)
-                # print(LR)
 
+                # # print("#####################")
+                # # print(cnts)
+                # # print("#####################")
+                # # print(TL)
+                # # print(TR)
+                # # print(LL)
+                # # print(LR)
+                #
                 A = Amatrix(TL, TR, LL, LR)
-                # print(A)
-
+                # # print(A)
+                #
                 H = homo(A)
-                # print(H)
-
+                # # print(H)
+                #
                 pixX=frame.shape[1]
                 pixY=frame.shape[0]
-
-                DWF = np.zeros([180, 320, 3])
-                # print(DWF)
-
-                DWF=dewarp(DWF,frame,H,pixX,pixY)
-
-
+                #
+                #
+                # # print(DWF)
+                #
+                DWF=dewarp(DWF,frame,H,box,ogframe)
+                #
+                #
                 cv2.imshow('DWF',DWF)
 
 
-            except:
-                None
+            # except:
+            #     None
                 # print('###################')
                 # print(cnts)
             framecount=framecount+1
