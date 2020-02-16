@@ -1,8 +1,10 @@
 from __main__ import *
 
-def dewarp(DWF,frame,H,box,ogframe):
-    DWF = np.zeros([180, 320, 3])
-    DFW = np.float64(DWF)
+def dewarp(DWF,frame,H,box):
+
+
+    # DWF = np.zeros([frame.shape[0], frame.shape[1], 3])
+    # DFW = np.float64(DWF)
     # print('############')
     x_max, y_max = np.amax(box, axis=0)
     x_min, y_min = np.amin(box, axis=0)
@@ -25,7 +27,7 @@ def dewarp(DWF,frame,H,box,ogframe):
             # print('p1',p1)
 
 
-            p2=np.matmul(Hinv,p1)
+            p2=-np.matmul(Hinv,p1)
 
             p2=(p2/p2[2]).astype(int)
 

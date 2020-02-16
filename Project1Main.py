@@ -26,8 +26,7 @@ im_height = 240
 
 
 def main(prgRun):
-    DWF = np.zeros([180, 320, 3])
-    DFW=np.float64(DWF)
+
     framecount = 1
 
     blobParams = cv2.SimpleBlobDetector_Params()
@@ -35,7 +34,7 @@ def main(prgRun):
     blobParams.blobColor = 255
 
     blobParams.filterByArea = True
-    blobParams.maxArea =36000
+    blobParams.maxArea =60000
 
     blobVer = (cv2.__version__).split('.')
     if int(blobVer[0]) < 3:
@@ -48,6 +47,7 @@ def main(prgRun):
     print('Initializations complete')
 
     datachoice=1
+    section=2
     # datachoice = int(input('\nWhich video data would you like to use? \nPlease enter 1, 2, or 3: '))
     # section = input('\nIdentify QR code? Impose Image? Impose Cube? \nPlease enter 1, 2, or 3: ')
 
@@ -62,6 +62,15 @@ def main(prgRun):
         print('End Program')
         # prgRun=False
         # return prgRun
+
+    lena = cv2.imread("Lena.png")
+    # lenah = lena.shape(0)
+    # lenaw=lena.shape(1)
+
+    # cv2.imshow('Lena',lena)
+
+
+
 
     # Read until video is completed
     while (video.isOpened()):
@@ -86,105 +95,116 @@ def main(prgRun):
                 py = int(blobOrigin[i].pt[1])
                 blobRadius = int(blobOrigin[i].size)
 
-            # print([px,py])
-            # print(blobRadius)
+                # print([px,py])
+                # print(blobRadius)
 
-            frame=frame[py-blobRadius:py+blobRadius,px-blobRadius:px+blobRadius]
-            ogframe = ogframe[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
-            #
-            # cv2.imshow('modified frame', frame)
-
-
-
-            # center = cv2.drawKeypoints(frame, blobOrigin, np.array([]), (0, 255, 255),cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-            # # print(center)
-            # cv2.imshow('keypoints', center)
-
-            cnts, hierarchy = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            # cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[1:]
-            # print(cnts)
-
-            if framecount>1:
-                cntsmissing=(cv2.contourArea(oldcnts[1])-cv2.contourArea(cnts[1]))**2
-                if cntsmissing >3200000:
-                    cnts=oldcnts
-            oldcnts=cnts
-            #
-            # epsilon = 0.1 * cv2.arcLength(cnts[1], True)
-            # corners=cv2.approxPolyDP(cnts[1], epsilon, True)
-
-            frame = cv2.drawContours(ogframe, cnts, -1, (0, 255, 0), 2)
-
-
-            ###########################
-            # Display the resulting frame
-            # cv2.imshow('Frame', frame)
-
-
-            # Press Q on keyboard to  exit
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                break
-
-            # try:
-            if True:
-
-                cnt=cnts[0]
-
-                x, y, w, h = cv2.boundingRect(cnt)
-                # cv2.rectangle(ogframe, (x, y), (x + w, y + h), (0, 255, 255), 2)
-
-                rect = cv2.minAreaRect(cnt)
-
-                box = cv2.boxPoints(rect)
-                box = np.int0(box)
-
-                cv2.drawContours(ogframe, [box], 0, (0, 0, 255), 2)
-
-                cv2.imshow('box',ogframe)
-
-
-                TL=np.array([box[0][0],box[0][1]])
-                LL=np.array([box[1][0],box[1][1]])
-                LR=np.array([box[2][0],box[2][1]])
-                TR = np.array([box[3][0], box[3][1]])
-
-                ############################WARNING##########################
-
-                C = np.matmul(np.ones([4, 2]), ([[px, 0], [0, py]]))
-
-                R = np.ones([4, 2]) * blobRadius
-
-                boxnew=C+R-box
-
-                # print(boxnew)
-
-                boxnew=box
-                ############################WARNING##########################
-
-                # A = Amatrix(TL, TR, LL, LR)
-                # # print(A)
+                # frame=frame[py-blobRadius:py+blobRadius,px-blobRadius:px+blobRadius]
+                # ogframe = ogframe[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
                 #
-                H = homo(boxnew)
-                # # print(H)
-                #
-                pixX=frame.shape[1]
-                pixY=frame.shape[0]
-                #
-                #
-                # # print(DWF)
-                #
-                # cv2.imshow('Frame', clnframe)
-                DWF=dewarp(DWF,frame,H,box,ogframe)
-                #
-                #
-                cv2.imshow('DWF',DWF)
+                # cv2.imshow('modified frame', frame)
 
 
-            # except:
-            #     None
-                # print('###################')
+                try:
+                    center = cv2.drawKeypoints(frame, blobOrigin, np.array([]), (0, 255, 255),cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+                    # # print(center)
+                    # cv2.imshow('keypoints', center)
+
+
+                    cnts, hierarchy = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                # cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[1:]
                 # print(cnts)
-            framecount=framecount+1
+                except:
+                    None
+
+                if framecount>1:
+                    cntsmissing=(cv2.contourArea(oldcnts[1])-cv2.contourArea(cnts[1]))**2
+                    if cntsmissing >3200000:
+                        cnts=oldcnts
+                oldcnts=cnts
+                #
+                # epsilon = 0.1 * cv2.arcLength(cnts[1], True)
+                # corners=cv2.approxPolyDP(cnts[1], epsilon, True)
+
+                frame = cv2.drawContours(ogframe, cnts, -1, (0, 255, 0), 2)
+
+
+                ###########################
+                # Display the resulting frame
+                # cv2.imshow('Frame', frame)
+
+
+                # Press Q on keyboard to  exit
+                if cv2.waitKey(25) & 0xFF == ord('q'):
+                    break
+
+                # try:
+                if True:
+
+                    cnt=cnts[0]
+
+                    x, y, w, h = cv2.boundingRect(cnt)
+                    # cv2.rectangle(ogframe, (x, y), (x + w, y + h), (0, 255, 255), 2)
+
+                    rect = cv2.minAreaRect(cnt)
+
+                    box = cv2.boxPoints(rect)
+                    box = np.int0(box)
+
+                    try:
+
+                        cv2.drawContours(ogframe, [box], 0, (0, 0, 255), 2)
+
+                        cv2.imshow('box',ogframe)
+                    except:
+                        None
+
+
+                    TL=np.array([box[0][0],box[0][1]])
+                    LL=np.array([box[1][0],box[1][1]])
+                    LR=np.array([box[2][0],box[2][1]])
+                    TR = np.array([box[3][0], box[3][1]])
+
+                    ############################WARNING##########################
+
+                    C = np.matmul(np.ones([4, 2]), ([[px, 0], [0, py]]))
+
+                    R = np.ones([4, 2]) * blobRadius
+
+                    boxnew=C+R-box
+
+                    # print(boxnew)
+
+                    boxnew=box
+                    ############################WARNING##########################
+
+
+                    if section==1:
+                        OutputFrame = np.zeros([180, 320, 3])
+                        OutputFrame = np.float64(DWF)
+                        H = homo(boxnew,9)
+
+                    if section==2:
+                        OutputFrame=clnframe
+                        AppliedFrame=lena
+                        # print(lena.shape)
+                        H = homo(boxnew,512)
+
+
+                    DWF=dewarp(OutputFrame,AppliedFrame,H,box)
+                    #
+                    #
+                    try:
+                        cv2.imshow('DWF',DWF)
+
+                    except:
+                        None
+
+
+                # except:
+                #     None
+                    # print('###################')
+                    # print(cnts)
+                framecount=framecount+1
 
         # Break the loop
         else:

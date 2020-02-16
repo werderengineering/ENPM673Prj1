@@ -1,16 +1,22 @@
 from __main__ import *
 
 
-def square(side=100):
+def square(side):
     """return four corner of square, the point vector is in row"""
     return np.array([[0, 0], [0, side], [side, side], [side,0]])
 
 
 
-def homo(p1, p2=square()):
+def homo(p1, p2):
+
+    if p2==9:
+        p2 = square(100)
+    else:
+        p2 = square(512)
+
     h, status = cv2.findHomography(p1, p2)
 
-    print('\nh',h)
+
     """Input two stack of points, each stack has four points vector in row,
     return homograph between two stack"""
     # check input points
@@ -69,8 +75,8 @@ def homo(p1, p2=square()):
     H = np.reshape(X, (3, 3))   # make H a matrix
     # H = np.linalg.pinv(H)
     H = H / H[2][2]     # normalize
-
-    print('\nH',H)
+    # print('\nh', h)
+    # print('\nH',H)
 
     H=h
     return H
