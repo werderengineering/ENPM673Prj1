@@ -1,9 +1,16 @@
-"""IMPORT"""
-import numpy as np
+from __main__ import *
+
+
 def square(side=100):
     """return four corner of square, the point vector is in row"""
     return np.array([[0, 0], [0, side], [side, side], [side,0]])
+
+
+
 def homo(p1, p2=square()):
+    h, status = cv2.findHomography(p1, p2)
+
+    print('\nh',h)
     """Input two stack of points, each stack has four points vector in row,
     return homograph between two stack"""
     # check input points
@@ -18,6 +25,15 @@ def homo(p1, p2=square()):
     [xp2, yp2] = p2[1]
     [xp3, yp3] = p2[3]
     [xp4, yp4] = p2[3]
+
+    # [x1, y1] = p2[0]
+    # [x2, y2] = p2[1]
+    # [x3, y3] = p2[2]
+    # [x4, y4] = p2[3]
+    # [xp1, yp1] = p1[0]
+    # [xp2, yp2] = p1[1]
+    # [xp3, yp3] = p1[3]
+    # [xp4, yp4] = p1[3]
     """
     x2 = 150
     x3 = 15
@@ -45,11 +61,16 @@ def homo(p1, p2=square()):
         [-x4, -y4, -1, 0, 0, 0, x4 * xp4, y4 * xp4, xp4],
         [0, 0, 0, -x4, -y4, -1, x4 * yp4, y4 * yp4, yp4]
     ], dtype=np.float64)
+
     u, s, v = np.linalg.svd(A)
     X = v[:][8]   # right singular vector
     # assert np.linalg.norm(X, axis=0).astype(int) == 1, "X is " + str(X)
     X = X / v[8][8]
     H = np.reshape(X, (3, 3))   # make H a matrix
-    H = np.linalg.pinv(H)
+    # H = np.linalg.pinv(H)
     H = H / H[2][2]     # normalize
+
+    print('\nH',H)
+
+    H=h
     return H

@@ -27,9 +27,8 @@ im_height = 240
 
 def main(prgRun):
     DWF = np.zeros([180, 320, 3])
+    DFW=np.float64(DWF)
     framecount = 1
-    ############################WARNING##########################
-
 
     blobParams = cv2.SimpleBlobDetector_Params()
     blobParams.filterByColor = True
@@ -45,7 +44,6 @@ def main(prgRun):
         blob = cv2.SimpleBlobDetector_create(blobParams)
 
     blob = cv2.SimpleBlobDetector_create(blobParams)
-    ############################WARNING##########################
 
     print('Initializations complete')
 
@@ -81,23 +79,26 @@ def main(prgRun):
             frame = cv2.bitwise_or(frame, frame, mask=mask)
 
 
-            ############################WARNING##########################
             blobOrigin = blob.detect(mask)
 
             for i in range(len(blobOrigin)):
-                px = int(blobOrigin[i].pt[0]) # i is the index of the blob you want to get the position
+                px = int(blobOrigin[i].pt[0])
                 py = int(blobOrigin[i].pt[1])
-                r = np.ceil(blobOrigin[i].size) * 1
+                blobRadius = int(blobOrigin[i].size)
 
-            print([px,py])
-            print(r)
+            # print([px,py])
+            # print(blobRadius)
+
+            frame=frame[py-blobRadius:py+blobRadius,px-blobRadius:px+blobRadius]
+            ogframe = ogframe[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
+            #
+            # cv2.imshow('modified frame', frame)
 
 
 
             # center = cv2.drawKeypoints(frame, blobOrigin, np.array([]), (0, 255, 255),cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
             # # print(center)
             # cv2.imshow('keypoints', center)
-            ############################WARNING##########################
 
             cnts, hierarchy = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             # cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[1:]
@@ -137,9 +138,9 @@ def main(prgRun):
                 box = cv2.boxPoints(rect)
                 box = np.int0(box)
 
-                cv2.drawContours(clnframe, [box], 0, (0, 0, 255), 2)
+                cv2.drawContours(ogframe, [box], 0, (0, 0, 255), 2)
 
-                cv2.imshow('box',clnframe)
+                cv2.imshow('box',ogframe)
 
 
                 TL=np.array([box[0][0],box[0][1]])
@@ -147,12 +148,23 @@ def main(prgRun):
                 LR=np.array([box[2][0],box[2][1]])
                 TR = np.array([box[3][0], box[3][1]])
 
+                ############################WARNING##########################
 
-                #
+                C = np.matmul(np.ones([4, 2]), ([[px, 0], [0, py]]))
+
+                R = np.ones([4, 2]) * blobRadius
+
+                boxnew=C+R-box
+
+                # print(boxnew)
+
+                boxnew=box
+                ############################WARNING##########################
+
                 # A = Amatrix(TL, TR, LL, LR)
                 # # print(A)
                 #
-                H = homo(box)
+                H = homo(boxnew)
                 # # print(H)
                 #
                 pixX=frame.shape[1]
@@ -161,6 +173,7 @@ def main(prgRun):
                 #
                 # # print(DWF)
                 #
+                # cv2.imshow('Frame', clnframe)
                 DWF=dewarp(DWF,frame,H,box,ogframe)
                 #
                 #
