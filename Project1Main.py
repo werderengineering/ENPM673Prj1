@@ -28,6 +28,24 @@ im_height = 240
 def main(prgRun):
     DWF = np.zeros([180, 320, 3])
     framecount = 1
+    ############################WARNING##########################
+
+
+    blobParams = cv2.SimpleBlobDetector_Params()
+    blobParams.filterByColor = True
+    blobParams.blobColor = 255
+
+    blobParams.filterByArea = True
+    blobParams.maxArea =36000
+
+    blobVer = (cv2.__version__).split('.')
+    if int(blobVer[0]) < 3:
+        blob = cv2.SimpleBlobDetector(blobParams)
+    else:
+        blob = cv2.SimpleBlobDetector_create(blobParams)
+
+    blob = cv2.SimpleBlobDetector_create(blobParams)
+    ############################WARNING##########################
 
     print('Initializations complete')
 
@@ -59,18 +77,27 @@ def main(prgRun):
             clnframe=frame
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-
-            # frame = cv2.bilateralFilter(frame, 9, 75, 75)
-            # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-            # (thresh, frame) = cv2.threshold(frame, 180, 255, cv2.THRESH_BINARY)
-
             mask = cv2.inRange(frame, 180, 255)
             frame = cv2.bitwise_or(frame, frame, mask=mask)
 
-            # frame = cv2.Canny(frame, 180,255)
-            # cv2.imshow('Thresh', frame)
-            # print(frame.shape)
+
+            ############################WARNING##########################
+            blobOrigin = blob.detect(mask)
+
+            for i in range(len(blobOrigin)):
+                px = int(blobOrigin[i].pt[0]) # i is the index of the blob you want to get the position
+                py = int(blobOrigin[i].pt[1])
+                r = np.ceil(blobOrigin[i].size) * 1
+
+            print([px,py])
+            print(r)
+
+
+
+            # center = cv2.drawKeypoints(frame, blobOrigin, np.array([]), (0, 255, 255),cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+            # # print(center)
+            # cv2.imshow('keypoints', center)
+            ############################WARNING##########################
 
             cnts, hierarchy = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             # cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[1:]
@@ -81,29 +108,16 @@ def main(prgRun):
                 if cntsmissing >3200000:
                     cnts=oldcnts
             oldcnts=cnts
-
-            epsilon = 0.1 * cv2.arcLength(cnts[1], True)
-            corners=cv2.approxPolyDP(cnts[1], epsilon, True)
-
-            # for i in range(len(corners)):
-            #     x, y = corners[i][0], corners[i][1]
-            #     cv2.circle(frame, (x, y), 3, (0, 0, 255), -1)
-
-            # print('##########')
-            # print(corners)
-            # print(len(corners))
-            # input()
+            #
+            # epsilon = 0.1 * cv2.arcLength(cnts[1], True)
+            # corners=cv2.approxPolyDP(cnts[1], epsilon, True)
 
             frame = cv2.drawContours(ogframe, cnts, -1, (0, 255, 0), 2)
 
-            # frame = np.float32(frame)
-            # dst = cv2.cornerHarris(frame, 2, 3, 0.04)
-            # dst = cv2.dilate(dst, None)
-            # ogframe[dst > 0.01 * dst.max()] = [0,255]
 
             ###########################
             # Display the resulting frame
-            cv2.imshow('Frame', frame)
+            # cv2.imshow('Frame', frame)
 
 
             # Press Q on keyboard to  exit
@@ -112,7 +126,6 @@ def main(prgRun):
 
             # try:
             if True:
-                # boundingbox= [cv2.boundingRect(c) for c in cnts])
 
                 cnt=cnts[0]
 
@@ -120,13 +133,10 @@ def main(prgRun):
                 # cv2.rectangle(ogframe, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
                 rect = cv2.minAreaRect(cnt)
-                # print(rect)
-                # input()
+
                 box = cv2.boxPoints(rect)
                 box = np.int0(box)
-                #
-                # print(box)
-                # print(box[0])
+
                 cv2.drawContours(clnframe, [box], 0, (0, 0, 255), 2)
 
                 cv2.imshow('box',clnframe)
@@ -137,20 +147,12 @@ def main(prgRun):
                 LR=np.array([box[2][0],box[2][1]])
                 TR = np.array([box[3][0], box[3][1]])
 
-                # print(TL)
 
-                # # print("#####################")
-                # # print(cnts)
-                # # print("#####################")
-                # # print(TL)
-                # # print(TR)
-                # # print(LL)
-                # # print(LR)
                 #
-                A = Amatrix(TL, TR, LL, LR)
+                # A = Amatrix(TL, TR, LL, LR)
                 # # print(A)
                 #
-                H = homo(A)
+                H = homo(box)
                 # # print(H)
                 #
                 pixX=frame.shape[1]
