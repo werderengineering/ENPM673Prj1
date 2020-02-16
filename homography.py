@@ -14,7 +14,7 @@ def homo(p1, p2):
     else:
         p2 = square(512)
 
-    h, status = cv2.findHomography(p1, p2)
+    # h, status = cv2.findHomography(p1, p2)
 
 
     """Input two stack of points, each stack has four points vector in row,
@@ -29,7 +29,7 @@ def homo(p1, p2):
     [x4, y4] = p1[3]
     [xp1, yp1] = p2[0]
     [xp2, yp2] = p2[1]
-    [xp3, yp3] = p2[3]
+    [xp3, yp3] = p2[2]
     [xp4, yp4] = p2[3]
 
     # [x1, y1] = p2[0]
@@ -78,5 +78,5 @@ def homo(p1, p2):
     # print('\nh', h)
     # print('\nH',H)
 
-    H=h
+    # H=h
     return H
