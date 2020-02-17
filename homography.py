@@ -9,10 +9,16 @@ def square(side):
 
 def homo(p1, p2):
 
-    if p2==9:
-        p2 = square(100)
-    else:
-        p2 = square(512)
+    try:
+
+        if p2==0:
+            p2 = square(100)
+        if p2==512:
+            p2 = square(512)
+
+    except:
+        p2=p2
+
 
     # h, status = cv2.findHomography(p1, p2)
 

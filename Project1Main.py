@@ -29,6 +29,16 @@ def main(prgRun):
 
     framecount = 1
 
+    dcoeff=np.array([0.06981980863464919, -0.2293512169497289, -0.00525889574956216, -0.001081794502850245])
+
+    ICV = np.array([
+        [1465.1743559463634, 0, 501.5010208509487],
+        [0, 1478.4325536850997, 905.945757447447],
+        [0, 0, 1]
+    ])
+
+    resolution=np.array([1080, 1920])
+
     blobParams = cv2.SimpleBlobDetector_Params()
     blobParams.filterByColor = True
     blobParams.blobColor = 255
@@ -47,7 +57,7 @@ def main(prgRun):
     print('Initializations complete')
 
     datachoice=1
-    section=2
+    section=3
     # datachoice = int(input('\nWhich video data would you like to use? \nPlease enter 1, 2, or 3: '))
     # section = input('\nIdentify QR code? Impose Image? Impose Cube? \nPlease enter 1, 2, or 3: ')
 
@@ -64,10 +74,7 @@ def main(prgRun):
         # return prgRun
 
     lena = cv2.imread("Lena.png")
-    # lenah = lena.shape(0)
-    # lenaw=lena.shape(1)
 
-    # cv2.imshow('Lena',lena)
 
 
 
@@ -95,8 +102,6 @@ def main(prgRun):
                 py = int(blobOrigin[i].pt[1])
                 blobRadius = int(blobOrigin[i].size)
 
-                # print([px,py])
-                # print(blobRadius)
 
                 # frame=frame[py-blobRadius:py+blobRadius,px-blobRadius:px+blobRadius]
                 # ogframe = ogframe[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
@@ -182,19 +187,68 @@ def main(prgRun):
                         OutputFrame = np.zeros([180, 320, 3])
                         OutputFrame = np.float64(DWF)
                         H = homo(boxnew,9)
+                        # DWF = dewarp(OutputFrame, AppliedFrame, H, box)
 
                     if section==2:
                         OutputFrame=clnframe
                         AppliedFrame=lena
                         # print(lena.shape)
                         H = homo(boxnew,512)
+                        # DWF = dewarp(OutputFrame, AppliedFrame, H, box)
+
+                    # DWF = dewarp(OutputFrame, AppliedFrame, H, box)
+
+                    if section==3:
+
+                        ################BOX BUILDING 101####################
+
+                        boxtop=np.array([box[:,0]+10,box[:, 1] - 30]).T
+
+                        ################BOX Homography?#####################
+
+                        H = homo(box, boxtop)
 
 
-                    DWF=dewarp(OutputFrame,AppliedFrame,H,box)
+                        # P = np.matmul(K, np.matrix(R))
+                        # P = P / P[2, 3]
+
+
+
+                        ############Build the sides of the box##############
+                        boxL=np.array([
+                            box[0],
+                            boxtop[0],
+                            boxtop[1],
+                            box[1],
+                        ])
+
+                        boxR = np.array([
+                            box[2],
+                            boxtop[2],
+                            boxtop[3],
+                            box[3],
+                        ])
+
+
+
+                        cv2.drawContours(ogframe, [boxtop], 0, (255, 0, 255), 2)
+                        cv2.drawContours(ogframe, [boxL], 0, (127, 0, 0), 2)
+                        cv2.drawContours(ogframe, [boxR], 0, (255, 0, 0), 2)
+
+
+
+
+
+
+                        cv2.imshow('box', ogframe)
+
+
+
                     #
                     #
                     try:
-                        cv2.imshow('DWF',DWF)
+                        None
+                        # cv2.imshow('DWF',DWF)
 
                     except:
                         None
