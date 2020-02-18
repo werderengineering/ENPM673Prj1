@@ -43,6 +43,8 @@ def main(prgRun):
     blobParams.filterByColor = True
     blobParams.blobColor = 255
 
+    blobParams.filterByCircularity = False
+
     blobParams.filterByArea = True
     blobParams.maxArea =60000
 
@@ -57,7 +59,7 @@ def main(prgRun):
     print('Initializations complete')
 
     datachoice=1
-    section=3
+    section=1
     # datachoice = int(input('\nWhich video data would you like to use? \nPlease enter 1, 2, or 3: '))
     # section = input('\nIdentify QR code? Impose Image? Impose Cube? \nPlease enter 1, 2, or 3: ')
 
@@ -103,8 +105,8 @@ def main(prgRun):
                 blobRadius = int(blobOrigin[i].size)
 
 
-                # frame=frame[py-blobRadius:py+blobRadius,px-blobRadius:px+blobRadius]
-                # ogframe = ogframe[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
+                frame=frame[py-blobRadius:py+blobRadius,px-blobRadius:px+blobRadius]
+                ogframe = ogframe[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
                 #
                 # cv2.imshow('modified frame', frame)
 
@@ -132,6 +134,8 @@ def main(prgRun):
 
                 frame = cv2.drawContours(ogframe, cnts, -1, (0, 255, 0), 2)
 
+                frame = cv2.drawContours(ogframe, cnts, 2, (255, 0, 255), 2)
+
 
                 ###########################
                 # Display the resulting frame
@@ -147,6 +151,7 @@ def main(prgRun):
 
                     cnt=cnts[0]
 
+
                     x, y, w, h = cv2.boundingRect(cnt)
                     # cv2.rectangle(ogframe, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
@@ -157,7 +162,7 @@ def main(prgRun):
 
                     try:
 
-                        cv2.drawContours(ogframe, [box], 0, (0, 0, 255), 2)
+                        # cv2.drawContours(ogframe, [box], 0, (255, 255, 0), 2)
 
                         cv2.imshow('box',ogframe)
                     except:
@@ -185,8 +190,8 @@ def main(prgRun):
 
                     if section==1:
                         OutputFrame = np.zeros([180, 320, 3])
-                        OutputFrame = np.float64(DWF)
-                        H = homo(boxnew,9)
+                        OutputFrame = np.float64(OutputFrame)
+                        H = homo(boxnew,0)
                         # DWF = dewarp(OutputFrame, AppliedFrame, H, box)
 
                     if section==2:
@@ -196,7 +201,6 @@ def main(prgRun):
                         H = homo(boxnew,512)
                         # DWF = dewarp(OutputFrame, AppliedFrame, H, box)
 
-                    # DWF = dewarp(OutputFrame, AppliedFrame, H, box)
 
                     if section==3:
 
@@ -240,15 +244,34 @@ def main(prgRun):
 
 
 
-                        cv2.imshow('box', ogframe)
+
+                    ############ROTATIONofIMAGEMATRIX#############
+
+                    qrcnt = cnts[2]
+
+
+
+
+                    # finalframe=Rotation*DWF
 
 
 
                     #
                     #
                     try:
-                        None
-                        # cv2.imshow('DWF',DWF)
+                        # None
+                        if section == 1 or section==2:
+                            cv2.imshow('DWF',DWF)
+                            # cv2.imshow('Finalframe',finalframe)
+                        else:
+                            try:
+                                cv2.imshow('box', ogframe)
+                            except:
+                                None
+
+
+
+
 
                     except:
                         None
