@@ -21,10 +21,6 @@ im_height = 240
 
 
 
-
-
-
-
 def main(prgRun):
 
     framecount = 1
@@ -105,10 +101,11 @@ def main(prgRun):
                 blobRadius = int(blobOrigin[i].size)
 
 
-                frame=frame[py-blobRadius:py+blobRadius,px-blobRadius:px+blobRadius]
-                ogframe = ogframe[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
-                #
-                # cv2.imshow('modified frame', frame)
+                # frame=frame[py-blobRadius:py+blobRadius,px-blobRadius:px+blobRadius]
+                # ogframe = ogframe[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
+                #     #
+                    # cv2.imshow('modified frame', mframe)
+
 
 
                 try:
@@ -160,13 +157,14 @@ def main(prgRun):
                     box = cv2.boxPoints(rect)
                     box = np.int0(box)
 
-                    try:
 
-                        # cv2.drawContours(ogframe, [box], 0, (255, 255, 0), 2)
-
-                        cv2.imshow('box',ogframe)
-                    except:
-                        None
+                    # try:
+                    #
+                    #     cv2.drawContours(ogframe, [box], 0, (255, 255, 0), 2)
+                    #
+                    #     cv2.imshow('box',ogframe)
+                    # except:
+                    #     None
 
 
                     TL=np.array([box[0][0],box[0][1]])
@@ -187,11 +185,19 @@ def main(prgRun):
                     boxnew=box
                     ############################WARNING##########################
 
+                    ############ROTATIONofIMAGEMATRIX#############
 
-                    if section==1:
+                    qrcnt = cnts[2]
+
+                    # lena=Rotation*lena
+
+
+                    ############ROTATIONofIMAGEMATRIX#############
+
+                    if section == 1:
                         OutputFrame = np.zeros([180, 320, 3])
                         OutputFrame = np.float64(OutputFrame)
-                        H = homo(boxnew,0)
+                        H = homo(boxnew, 0)
                         # DWF = dewarp(OutputFrame, AppliedFrame, H, box)
 
                     if section==2:
@@ -199,7 +205,7 @@ def main(prgRun):
                         AppliedFrame=lena
                         # print(lena.shape)
                         H = homo(boxnew,512)
-                        # DWF = dewarp(OutputFrame, AppliedFrame, H, box)
+                        DWF = dewarp(OutputFrame, AppliedFrame, H, box)
 
 
                     if section==3:
@@ -242,25 +248,15 @@ def main(prgRun):
 
 
 
-
-
-
-                    ############ROTATIONofIMAGEMATRIX#############
-
-                    qrcnt = cnts[2]
-
-
-
-
-                    # finalframe=Rotation*DWF
-
-
-
                     #
                     #
                     try:
                         # None
-                        if section == 1 or section==2:
+                        if section == 1:
+                            cv2.imshow('Tracking',frame)
+
+                        elif section ==2:
+
                             cv2.imshow('DWF',DWF)
                             # cv2.imshow('Finalframe',finalframe)
                         else:
