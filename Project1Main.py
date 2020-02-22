@@ -6,12 +6,13 @@ import math
 from homography import homo
 from Amatrix import Amatrix
 from dewarp import dewarp
+from findAngle import findAngleAndID
+from scipy import ndimage
 
 print('Imports Complete')
 
 print('CV2 version')
 print(cv2.__version__)
-
 
 prgRun = True
 
@@ -19,13 +20,10 @@ im_width = 320
 im_height = 240
 
 
-
-
 def main(prgRun):
-
     framecount = 1
 
-    dcoeff=np.array([0.06981980863464919, -0.2293512169497289, -0.00525889574956216, -0.001081794502850245])
+    dcoeff = np.array([0.06981980863464919, -0.2293512169497289, -0.00525889574956216, -0.001081794502850245])
 
     ICV = np.array([
         [1465.1743559463634, 0, 501.5010208509487],
@@ -33,7 +31,7 @@ def main(prgRun):
         [0, 0, 1]
     ])
 
-    resolution=np.array([1080, 1920])
+    resolution = np.array([1080, 1920])
 
     blobParams = cv2.SimpleBlobDetector_Params()
     blobParams.filterByColor = True
@@ -42,7 +40,7 @@ def main(prgRun):
     blobParams.filterByCircularity = False
 
     blobParams.filterByArea = True
-    blobParams.maxArea =60000
+    blobParams.maxArea = 60000
 
     blobVer = (cv2.__version__).split('.')
     if int(blobVer[0]) < 3:
@@ -54,8 +52,8 @@ def main(prgRun):
 
     print('Initializations complete')
 
-    datachoice=1
-    section=1
+    datachoice = 1
+    section = 2
     # datachoice = int(input('\nWhich video data would you like to use? \nPlease enter 1, 2, or 3: '))
     # section = input('\nIdentify QR code? Impose Image? Impose Cube? \nPlease enter 1, 2, or 3: ')
 
@@ -73,10 +71,6 @@ def main(prgRun):
 
     lena = cv2.imread("Lena.png")
 
-
-
-
-
     # Read until video is completed
     while (video.isOpened()):
         # Capture frame-by-frame
@@ -86,12 +80,12 @@ def main(prgRun):
             ###########################
             frame = imutils.resize(frame, width=320)
             ogframe = frame
-            clnframe=frame
+            clnframe = frame
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            grayframe = frame
 
             mask = cv2.inRange(frame, 180, 255)
             frame = cv2.bitwise_or(frame, frame, mask=mask)
-
 
             blobOrigin = blob.detect(mask)
 
@@ -100,19 +94,18 @@ def main(prgRun):
                 py = int(blobOrigin[i].pt[1])
                 blobRadius = int(blobOrigin[i].size)
 
-
-                # frame=frame[py-blobRadius:py+blobRadius,px-blobRadius:px+blobRadius]
+                # frame = frame[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
                 # ogframe = ogframe[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
-                #     #
-                    # cv2.imshow('modified frame', mframe)
+                # grayframe=grayframe[py - blobRadius:py + blobRadius, px - blobRadius:px + blobRadius]
 
-
+                #
+                # cv2.imshow('modified frame', mframe)
 
                 try:
-                    center = cv2.drawKeypoints(frame, blobOrigin, np.array([]), (0, 255, 255),cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+                    center = cv2.drawKeypoints(frame, blobOrigin, np.array([]), (0, 255, 255),
+                                               cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
                     # # print(center)
                     # cv2.imshow('keypoints', center)
-
 
                     cnts, hierarchy = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                 # cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[1:]
@@ -120,11 +113,11 @@ def main(prgRun):
                 except:
                     None
 
-                if framecount>1:
-                    cntsmissing=(cv2.contourArea(oldcnts[1])-cv2.contourArea(cnts[1]))**2
-                    if cntsmissing >3200000:
-                        cnts=oldcnts
-                oldcnts=cnts
+                if framecount > 1:
+                    cntsmissing = (cv2.contourArea(oldcnts[1]) - cv2.contourArea(cnts[1])) ** 2
+                    if cntsmissing > 3200000:
+                        cnts = oldcnts
+                oldcnts = cnts
                 #
                 # epsilon = 0.1 * cv2.arcLength(cnts[1], True)
                 # corners=cv2.approxPolyDP(cnts[1], epsilon, True)
@@ -133,11 +126,9 @@ def main(prgRun):
 
                 frame = cv2.drawContours(ogframe, cnts, 2, (255, 0, 255), 2)
 
-
                 ###########################
                 # Display the resulting frame
                 # cv2.imshow('Frame', frame)
-
 
                 # Press Q on keyboard to  exit
                 if cv2.waitKey(25) & 0xFF == ord('q'):
@@ -146,8 +137,7 @@ def main(prgRun):
                 # try:
                 if True:
 
-                    cnt=cnts[0]
-
+                    cnt = cnts[0]
 
                     x, y, w, h = cv2.boundingRect(cnt)
                     # cv2.rectangle(ogframe, (x, y), (x + w, y + h), (0, 255, 255), 2)
@@ -157,7 +147,6 @@ def main(prgRun):
                     box = cv2.boxPoints(rect)
                     box = np.int0(box)
 
-
                     # try:
                     #
                     #     cv2.drawContours(ogframe, [box], 0, (255, 255, 0), 2)
@@ -166,10 +155,9 @@ def main(prgRun):
                     # except:
                     #     None
 
-
-                    TL=np.array([box[0][0],box[0][1]])
-                    LL=np.array([box[1][0],box[1][1]])
-                    LR=np.array([box[2][0],box[2][1]])
+                    TL = np.array([box[0][0], box[0][1]])
+                    LL = np.array([box[1][0], box[1][1]])
+                    LR = np.array([box[2][0], box[2][1]])
                     TR = np.array([box[3][0], box[3][1]])
 
                     ############################WARNING##########################
@@ -178,19 +166,39 @@ def main(prgRun):
 
                     R = np.ones([4, 2]) * blobRadius
 
-                    boxnew=C+R-box
+                    boxnew = C + R - box
 
                     # print(boxnew)
 
-                    boxnew=box
+                    boxnew = box
                     ############################WARNING##########################
 
                     ############ROTATIONofIMAGEMATRIX#############
 
-                    qrcnt = cnts[2]
+                    cntblck = cnts[1]
 
-                    # lena=Rotation*lena
+                    x, y, w, h = cv2.boundingRect(cntblck)
 
+                    grayframe=grayframe[y - h:y + h, x - w:x + w]
+
+                    try:
+                        cv2.imshow('grayframe',grayframe)
+                        angle, ID = findAngleAndID(grayframe, 0, 0)
+
+                        if angle < 0:
+                            angle = 270
+
+                        print("Angle: ", angle)
+
+                        lenaR = ndimage.rotate(lena, angle)
+                        pangle=angle
+                    except:
+                        lenaR = ndimage.rotate(lena, pangle)
+
+
+
+
+                    # cv2.imshow('LenaR',lenaR)
 
                     ############ROTATIONofIMAGEMATRIX#############
 
@@ -200,32 +208,27 @@ def main(prgRun):
                         H = homo(boxnew, 0)
                         # DWF = dewarp(OutputFrame, AppliedFrame, H, box)
 
-                    if section==2:
-                        OutputFrame=clnframe
-                        AppliedFrame=lena
+                    if section == 2:
+                        OutputFrame = clnframe
+                        AppliedFrame = lenaR
                         # print(lena.shape)
-                        H = homo(boxnew,512)
+                        H = homo(boxnew, 512)
                         DWF = dewarp(OutputFrame, AppliedFrame, H, box)
 
-
-                    if section==3:
-
+                    if section == 3:
                         ################BOX BUILDING 101####################
 
-                        boxtop=np.array([box[:,0]+10,box[:, 1] - 30]).T
+                        boxtop = np.array([box[:, 0] + 10, box[:, 1] - 30]).T
 
                         ################BOX Homography?#####################
 
                         H = homo(box, boxtop)
 
-
                         # P = np.matmul(K, np.matrix(R))
                         # P = P / P[2, 3]
 
-
-
                         ############Build the sides of the box##############
-                        boxL=np.array([
+                        boxL = np.array([
                             box[0],
                             boxtop[0],
                             boxtop[1],
@@ -239,25 +242,20 @@ def main(prgRun):
                             box[3],
                         ])
 
-
-
                         cv2.drawContours(ogframe, [boxtop], 0, (255, 0, 255), 2)
                         cv2.drawContours(ogframe, [boxL], 0, (127, 0, 0), 2)
                         cv2.drawContours(ogframe, [boxR], 0, (255, 0, 0), 2)
-
-
-
 
                     #
                     #
                     try:
                         # None
                         if section == 1:
-                            cv2.imshow('Tracking',frame)
+                            cv2.imshow('Tracking', frame)
 
-                        elif section ==2:
+                        elif section == 2:
 
-                            cv2.imshow('DWF',DWF)
+                            cv2.imshow('DWF', DWF)
                             # cv2.imshow('Finalframe',finalframe)
                         else:
                             try:
@@ -272,18 +270,15 @@ def main(prgRun):
                     except:
                         None
 
-
                 # except:
                 #     None
-                    # print('###################')
-                    # print(cnts)
-                framecount=framecount+1
+                # print('###################')
+                # print(cnts)
+                framecount = framecount + 1
 
         # Break the loop
         else:
             break
-
-
 
     # return prgRun
 
