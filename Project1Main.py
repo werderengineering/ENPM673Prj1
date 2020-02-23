@@ -6,7 +6,7 @@ import math
 from homography import homo
 
 from dewarp import dewarp
-from findAngle import findAngleAndID
+from findAngle import *
 from scipy import ndimage
 
 
@@ -32,10 +32,10 @@ def main(prgRun):
     dcoeff = np.array([0.06981980863464919, -0.2293512169497289, -0.00525889574956216, -0.001081794502850245])
 
     ICV = np.array([
-        [1465.1743559463634, 0, 501.5010208509487],
-        [0, 1478.4325536850997, 905.945757447447],
-        [0, 0, 1]
-    ])
+        [1406.08415449821,0,0],
+        [2.20679787308599, 1417.99930662800,0],
+        [1014.13643417416, 566.347754321696,1]
+    ]).T
 
     resolution = np.array([1080, 1920])
 
@@ -58,7 +58,7 @@ def main(prgRun):
 
     print('Initializations complete')
 
-    datachoice = 2
+    datachoice = 1
     section = 3
     # datachoice = int(input('\nWhich video data would you like to use? \nPlease enter 1, 2, or 3: '))
     # section = input('\nIdentify QR code? Impose Image? Impose Cube? \nPlease enter 1, 2, or 3: ')
@@ -346,11 +346,25 @@ def main(prgRun):
 
 
 
-                        ################BOX Homography?#####################
+                        ################BOX Homography#####################
 
-                        H = homo(box, boxtop)
+                        H = homo(0,box)
 
-                        # boxtop=cube_top(perjectionMatrix, corners_inFrame, corners_flatView)
+                        perjectionMatrix=projectionMatrix(ICV, H)
+
+                        boxtop=cube_top(perjectionMatrix, 0, box)
+                        boxtop=np.abs(boxtop[:,0:2]).astype(int)
+                        boxtop[:,1]=boxtop[:,1]
+                        BTTR=boxtop[2]
+                        BTTL=boxtop[1]
+                        BTBL=boxtop[0]
+                        BTBR=boxtop[3]
+
+                        boxtop=np.array([BTTR,BTTL,BTBL,BTBR])
+
+
+                        print('\nb',box)
+                        print('bt',boxtop)
 
                         ############Build the sides of the box##############
                         boxL = np.array([

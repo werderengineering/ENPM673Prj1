@@ -9,6 +9,14 @@ def square(side):
 
 def homo(p1, p2):
 
+
+    try:
+        if p1==0:
+            print('p1 is square')
+            p1 = square(150)
+    except:
+        p1=p1
+
     try:
 
         if p2==0:
@@ -26,9 +34,12 @@ def homo(p1, p2):
     """Input two stack of points, each stack has four points vector in row,
     return homograph between two stack"""
     # check input points
-    assert p1.shape == (4, 2), "P1 has size: " + str(p1.shape)
-    assert p2.shape == (4, 2), "P2 has size: " + str(p2.shape)
-    # assign values
+    # assert p1.shape == (4, 2), "P1 has size: " + str(p1.shape)
+    # assert p2.shape == (4, 2), "P2 has size: " + str(p2.shape)
+    # assign values'
+    # print(p1)
+    # print(p2)
+
     [x1, y1] = p1[0]
     [x2, y2] = p1[1]
     [x3, y3] = p1[2]
