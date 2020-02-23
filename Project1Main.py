@@ -4,11 +4,11 @@ from __main__ import *
 import imutils
 import math
 from homography import homo
-from Amatrix import Amatrix
+
 from dewarp import dewarp
 from findAngle import findAngleAndID
 from scipy import ndimage
-from Cube import cube_top
+
 
 print('Imports Complete')
 
@@ -350,7 +350,7 @@ def main(prgRun):
 
                         H = homo(box, boxtop)
 
-                        boxtop=cube_top(perjectionMatrix, corners_inFrame, corners_flatView)
+                        # boxtop=cube_top(perjectionMatrix, corners_inFrame, corners_flatView)
 
                         ############Build the sides of the box##############
                         boxL = np.array([
