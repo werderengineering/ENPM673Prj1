@@ -52,7 +52,6 @@ def homo(p1, p2):
 
     u, s, v = np.linalg.svd(A)
     X = v[:][8]   # right singular vector
-    # assert np.linalg.norm(X, axis=0).astype(int) == 1, "X is " + str(X)
     X = X / v[8][8]
     H = np.reshape(X, (3, 3))   # make H a matrix
     # H = np.linalg.pinv(H)

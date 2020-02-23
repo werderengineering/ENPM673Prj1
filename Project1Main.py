@@ -185,8 +185,8 @@ def main(prgRun):
 
 
                 #
-                # epsilon = 0.1 * cv2.arcLength(cnts[1], True)
-                # corners=cv2.approxPolyDP(cnts[1], epsilon, True)
+                # epsilon = 0.1 * cv2.arcLength(cnts, True)
+                # corners=cv2.approxPolyDP(cnts, epsilon, True)
 
 
 
@@ -226,18 +226,16 @@ def main(prgRun):
                     LR = np.array([box[2][0], box[2][1]])
                     TR = np.array([box[3][0], box[3][1]])
 
-                    ############################WARNING##########################
 
-                    C = np.matmul(np.ones([4, 2]), ([[px, 0], [0, py]]))
+                    C = np.matmul(np.ones(box.shape), ([[px, 0], [0, py]]))
 
-                    R = np.ones([4, 2]) * blobRadius
+                    R = np.ones(box.shape) * blobRadius
 
                     boxnew = C +box-R
                     #
                     # # print(boxnew)
 
                     # boxnew = box
-                    ############################WARNING##########################
 
                     ############ROTATIONofIMAGEMATRIX#############
 
@@ -337,14 +335,15 @@ def main(prgRun):
                         H = homo(boxnew, 512)
                         clnframe = dewarp(That, ThisOn, H, inhere)
 
-                    print('QR: ', qR)
-                    cv2.imshow('see this', clnframe)
-                    # input("Press enter")
+
 
                     if section == 3:
                         ################BOX BUILDING 101####################
+                        box=boxnew.astype(int)
 
                         boxtop = np.array([box[:, 0] + 10, box[:, 1] - 30]).T
+
+
 
                         ################BOX Homography?#####################
 
@@ -368,10 +367,19 @@ def main(prgRun):
                             box[3],
                         ])
 
-                        cv2.drawContours(ogframe, [boxtop], 0, (255, 0, 255), 2)
-                        cv2.drawContours(ogframe, [boxL], 0, (127, 0, 0), 2)
-                        cv2.drawContours(ogframe, [boxR], 0, (255, 0, 0), 2)
+                        # cv2.imshow('frame',frame)
 
+                        # print(box)
+                        # print(boxnew.astype(int))
+
+                        cv2.drawContours(clnframe, [box], 0, (255, 127, 255), 2)
+                        cv2.drawContours(clnframe, [boxtop], 0, (255, 0, 255), 2)
+                        cv2.drawContours(clnframe, [boxL], 0, (127, 0, 0), 2)
+                        cv2.drawContours(clnframe, [boxR], 0, (255, 0, 0), 2)
+
+                        # print('QR: ', qR)
+                        # cv2.imshow('see this', clnframe)
+                        # input("Press enter")
                 # except:
                 #     None
 
@@ -391,7 +399,7 @@ def main(prgRun):
                     # cv2.imshow('Finalframe',finalframe)
                 else:
                     try:
-                        cv2.imshow('box', ogframe)
+                        cv2.imshow('box', clnframe)
                     except:
                         None
             except:
