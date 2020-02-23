@@ -51,13 +51,10 @@ def homo(p1, p2):
     ], dtype=np.float64)
 
     u, s, v = np.linalg.svd(A)
-    X = v[:][8]   # right singular vector
-    X = X / v[8][8]
-    H = np.reshape(X, (3, 3))   # make H a matrix
-    # H = np.linalg.pinv(H)
-    H = H / H[2][2]     # normalize
-    # print('\nh', h)
-    # print('\nH',H)
+    x = v[v.shape[1] - 1, :]
 
-    # H=h
+    X = x / v[8][8]
+    H = np.reshape(X, (3, 3))
+
+    H = H / H[2][2]
     return H

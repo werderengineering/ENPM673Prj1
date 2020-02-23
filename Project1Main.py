@@ -8,6 +8,7 @@ from Amatrix import Amatrix
 from dewarp import dewarp
 from findAngle import findAngleAndID
 from scipy import ndimage
+from Cube import cube_top
 
 print('Imports Complete')
 
@@ -349,8 +350,7 @@ def main(prgRun):
 
                         H = homo(box, boxtop)
 
-                        # P = np.matmul(K, np.matrix(R))
-                        # P = P / P[2, 3]
+                        boxtop=cube_top(perjectionMatrix, corners_inFrame, corners_flatView)
 
                         ############Build the sides of the box##############
                         boxL = np.array([
